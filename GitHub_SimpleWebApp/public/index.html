@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lifestyle Manager</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/error-handling.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Lifestyle Manager</h1>
+      <nav>
+        <ul class="tabs">
+          <li><a href="#recipes" class="active" data-tab="recipes">Recipes</a></li>
+          <li><a href="#habits" data-tab="habits">Habits</a></li>
+          <li><a href="#blog" data-tab="blog">Blog</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Recipes Section -->
+      <section id="recipes" class="tab-content active">
+        <h2>Recipe Manager</h2>
+        
+        <div class="form-container">
+          <h3>Add New Recipe</h3>
+          <form id="recipe-form">
+            <div class="form-group">
+              <label for="recipe-title">Title</label>
+              <input type="text" id="recipe-title" required>
+            </div>
+            <div class="form-group">
+              <label for="recipe-category">Category</label>
+              <select id="recipe-category" required>
+                <option value="">Select Category</option>
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Snack">Snack</option>
+                <option value="Dessert">Dessert</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="recipe-instructions">Instructions</label>
+              <textarea id="recipe-instructions" rows="4" required></textarea>
+            </div>
+            <input type="hidden" id="recipe-id">
+            <button type="submit">Save Recipe</button>
+            <button type="button" id="cancel-edit-recipe" style="display:none;">Cancel Edit</button>
+          </form>
+        </div>
+
+        <div class="list-container">
+          <h3>My Recipes</h3>
+          <div id="recipe-list"></div>
+        </div>
+      </section>
+
+      <!-- Habits Section -->
+      <section id="habits" class="tab-content">
+        <h2>Habit Tracker</h2>
+        
+        <div class="form-container">
+          <h3>Add New Habit</h3>
+          <form id="habit-form">
+            <div class="form-group">
+              <label for="habit-title">Habit Title</label>
+              <input type="text" id="habit-title" required>
+            </div>
+            <button type="submit">Add Habit</button>
+          </form>
+        </div>
+
+        <div class="list-container">
+          <h3>My Habits</h3>
+          <div id="habit-list"></div>
+        </div>
+      </section>
+
+      <!-- Blog Section -->
+      <section id="blog" class="tab-content">
+        <h2>Blog</h2>
+        
+        <div class="form-container">
+          <h3>Write New Post</h3>
+          <form id="blog-form">
+            <div class="form-group">
+              <label for="blog-title">Title</label>
+              <input type="text" id="blog-title" required>
+            </div>
+            <div class="form-group">
+              <label for="blog-body">Content</label>
+              <textarea id="blog-body" rows="6" required></textarea>
+            </div>
+            <input type="hidden" id="blog-id">
+            <button type="submit">Publish Post</button>
+            <button type="button" id="cancel-edit-blog" style="display:none;">Cancel Edit</button>
+          </form>
+        </div>
+
+        <div class="list-container">
+          <h3>My Posts</h3>
+          <div id="blog-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="network-status" class="network-status online">You are online</div>
+
+  <!-- Load error handling utilities first -->
+  <script src="js/error-handling.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

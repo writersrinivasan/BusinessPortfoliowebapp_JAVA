@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+
+# SQLite database
+*.sqlite
+*.db
+
+# Environment variables
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Coverage directory
+coverage/
+.nyc_output/
+
+# Operating system files
+.DS_Store
+Thumbs.db
