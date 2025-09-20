@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot Selection Test (No Dependencies)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            background-color: #0d6efd;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .slots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .slot-container {
+            position: relative;
+        }
+        input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slot-box {
+            display: block;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .slot-box:hover {
+            border-color: #0d6efd;
+            background-color: #f0f7ff;
+        }
+        input[type="radio"]:checked + .slot-box {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0953c3;
+            box-shadow: 0 3px 10px rgba(13, 110, 253, 0.3);
+        }
+        .status {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #0d6efd;
+        }
+        button {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0b5ed7;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        .success {
+            border-left-color: #198754;
+            background-color: #f0fff4;
+        }
+        .steps {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .steps h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Slot Selection Test</h1>
+        <p>This is a simplified test to verify that appointment time selection is working</p>
+    </div>
+    
+    <form id="test-form">
+        <h2>Select Appointment Time:</h2>
+        
+        <div class="slots-container">
+            <div class="slot-container">
+                <input type="radio" name="slot" id="slot1" value="09:00 AM">
+                <label class="slot-box" for="slot1">09:00 AM</label>
+            </div>
+            <div class="slot-container">
+                <input type="radio" name="slot" id="slot2" value="10:00 AM">
+                <label class="slot-box" for="slot2">10:00 AM</label>
+            </div>
+            <div class="slot-container">
+                <input type="radio" name="slot" id="slot3" value="11:00 AM">
+                <label class="slot-box" for="slot3">11:00 AM</label>
+            </div>
+            <div class="slot-container">
+                <input type="radio" name="slot" id="slot4" value="01:00 PM">
+                <label class="slot-box" for="slot4">01:00 PM</label>
+            </div>
+            <div class="slot-container">
+                <input type="radio" name="slot" id="slot5" value="02:00 PM">
+                <label class="slot-box" for="slot5">02:00 PM</label>
+            </div>
+            <div class="slot-container">
+                <input type="radio" name="slot" id="slot6" value="03:00 PM">
+                <label class="slot-box" for="slot6">03:00 PM</label>
+            </div>
+        </div>
+        
+        <button type="submit">Book Appointment</button>
+    </form>
+    
+    <div id="status" class="status">
+        <p>Please select an appointment time above.</p>
+    </div>
+    
+    <div class="steps">
+        <h3>📋 Fixed Issues:</h3>
+        <ol>
+            <li><strong>✅ 403 Error Fix:</strong> Added proper CORS headers to Flask app</li>
+            <li><strong>✅ Slot Selection Fix:</strong> Improved radio button handling and styling</li>
+            <li><strong>✅ Event Handling:</strong> Added proper click event handlers with visual feedback</li>
+            <li><strong>✅ URL Routing:</strong> Added support for both /book/ and /booking/ URLs</li>
+        </ol>
+        <p>If this test works but the main app doesn't, the issue is with Flask configuration, not the slot selection code.</p>
+    </div>
+    
+    <script>
+        // Test form submission
+        document.getElementById('test-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selectedSlot = document.querySelector('input[name="slot"]:checked');
+            const statusDiv = document.getElementById('status');
+            
+            if (selectedSlot) {
+                statusDiv.innerHTML = `
+                    <h3>✅ Success!</h3>
+                    <p>You selected: <strong>${selectedSlot.value}</strong></p>
+                    <p>Appointment slot selection is working correctly.</p>
+                `;
+                statusDiv.className = 'status success';
+            } else {
+                statusDiv.innerHTML = `
+                    <h3>⚠️ Warning</h3>
+                    <p>Please select an appointment time first.</p>
+                `;
+                statusDiv.className = 'status error';
+            }
+        });
+        
+        // Add click listeners to all labels
+        document.querySelectorAll('.slot-box').forEach(label => {
+            label.addEventListener('click', function() {
+                // Explicitly log when a slot is clicked
+                console.log('Slot clicked:', this.textContent.trim());
+                
+                // Find the corresponding radio input
+                const radio = document.getElementById(this.getAttribute('for'));
+                console.log('Radio checked state:', radio.checked);
+                
+                // Update status
+                document.getElementById('status').innerHTML = `
+                    <p>You selected: <strong>${this.textContent.trim()}</strong></p>
+                    <p>Click "Book Appointment" to continue.</p>
+                `;
+                document.getElementById('status').className = 'status';
+            });
+        });
+    </script>
+</body>
+</html>

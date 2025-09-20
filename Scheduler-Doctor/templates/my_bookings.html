@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-calendar-check"></i> My Appointments
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if not phone %}
+                    <!-- Phone Number Input Form -->
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Enter your phone number to view your appointment bookings.
+                    </div>
+                    
+                    <form method="GET" action="{{ url_for('my_bookings') }}">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" 
+                                       class="form-control" 
+                                       id="phone" 
+                                       name="phone" 
+                                       placeholder="Enter your phone number"
+                                       required>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Find Bookings
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                {% else %}
+                    <!-- Display Bookings -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-0">Bookings for: <span class="text-primary">{{ phone }}</span></h6>
+                        </div>
+                        <a href="{{ url_for('my_bookings') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Search Different Number
+                        </a>
+                    </div>
+                    
+                    {% if bookings %}
+                        <div class="row">
+                            {% for booking in bookings %}
+                            <div class="col-md-12 mb-3">
+                                <div class="card border-left-primary">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <h6 class="text-primary mb-1">
+                                                            <i class="bi bi-person-badge"></i> {{ booking.doctor_name }}
+                                                        </h6>
+                                                        <p class="text-muted mb-1">
+                                                            <i class="bi bi-clock"></i> {{ booking.slot }}
+                                                        </p>
+                                                        <p class="text-muted small mb-0">
+                                                            <i class="bi bi-calendar-event"></i> Today
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <p class="mb-1">
+                                                            <strong>Booking ID:</strong> 
+                                                            <span class="badge bg-secondary">{{ booking.id }}</span>
+                                                        </p>
+                                                        <p class="mb-1">
+                                                            <strong>Status:</strong> 
+                                                            <span class="badge bg-success">{{ booking.status.title() }}</span>
+                                                        </p>
+                                                        <p class="text-muted small mb-0">
+                                                            Booked: {{ booking.booking_date[:16] | replace('T', ' ') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-md-end">
+                                                <form method="POST" action="{{ url_for('my_bookings') }}" class="d-inline">
+                                                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                                                    <input type="hidden" name="patient_phone" value="{{ phone }}">
+                                                    <button type="submit" 
+                                                            class="btn btn-outline-danger btn-sm"
+                                                            onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                                        <i class="bi bi-x-circle"></i> Cancel
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Cancellation Policy:</strong> Appointments must be cancelled at least 24 hours in advance. 
+                            For last-minute changes, please call our office at (555) 123-4567.
+                        </div>
+                        
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-calendar-x display-4 text-muted"></i>
+                            <h5 class="mt-3 text-muted">No Appointments Found</h5>
+                            <p class="text-muted">No appointments found for this phone number.</p>
+                            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                                <i class="bi bi-calendar-plus"></i> Book New Appointment
+                            </a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-question-circle"></i> Help & Support
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6><i class="bi bi-telephone"></i> Contact Information</h6>
+                <p class="text-muted mb-3">
+                    <strong>Phone:</strong> (555) 123-4567<br>
+                    <strong>Email:</strong> support@scheduler.com<br>
+                    <strong>Hours:</strong> 8 AM - 6 PM, Mon-Fri
+                </p>
+                
+                <h6><i class="bi bi-info-circle"></i> Frequently Asked Questions</h6>
+                <div class="accordion accordion-flush" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq1">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse1">
+                                How do I cancel an appointment?
+                            </button>
+                        </h2>
+                        <div id="faqCollapse1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Use the "Cancel" button next to your appointment, or call our office at (555) 123-4567.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq2">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse2">
+                                Can I reschedule my appointment?
+                            </button>
+                        </h2>
+                        <div id="faqCollapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! Cancel your current appointment and book a new one, or call us for assistance.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq3">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse3">
+                                What should I bring to my appointment?
+                            </button>
+                        </h2>
+                        <div id="faqCollapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Please bring a valid photo ID, insurance card, and any relevant medical records.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-plus-circle"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="bi bi-calendar-plus"></i> Book New Appointment
+                    </a>
+                    <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Bookings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-refresh bookings every 60 seconds if phone number is provided
+{% if phone %}
+if ('{{ phone }}') {
+    setInterval(() => {
+        window.location.reload();
+    }, 60000);
+}
+{% endif %}
+
+// Form validation for phone input
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            // Remove non-numeric characters except common phone formatting
+            this.value = this.value.replace(/[^\d\-\(\)\+\s]/g, '');
+        });
+    }
+});
+</script>
+
+<style>
+.border-left-primary {
+    border-left: 4px solid #0d6efd !important;
+}
+
+.card-body .row .col-sm-6:first-child {
+    border-right: 1px solid #e9ecef;
+}
+
+@media (max-width: 576px) {
+    .card-body .row .col-sm-6:first-child {
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}

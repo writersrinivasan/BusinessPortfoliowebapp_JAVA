@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Slot Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .slot { margin: 10px 0; }
+        .slot input { display: none; }
+        .slot label { 
+            display: inline-block;
+            padding: 10px 20px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+        .slot label:hover { border-color: #007bff; background: #e7f3ff; }
+        .slot input:checked + label { 
+            background: #007bff; 
+            color: white; 
+            border-color: #0056b3;
+        }
+        .result { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background: #f8f9fa; 
+            border-left: 4px solid #007bff;
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 15px;
+        }
+        .error { color: red; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Minimal Slot Selection Test</h1>
+    <p>This is the most basic test to verify slot selection works correctly.</p>
+    
+    <form id="test-form">
+        <h3>Select a time slot:</h3>
+        
+        <div class="slot">
+            <input type="radio" name="slot" id="slot1" value="09:00 AM">
+            <label for="slot1" onclick="selectSlot('09:00 AM', 1)">09:00 AM</label>
+        </div>
+        
+        <div class="slot">
+            <input type="radio" name="slot" id="slot2" value="10:00 AM">
+            <label for="slot2" onclick="selectSlot('10:00 AM', 2)">10:00 AM</label>
+        </div>
+        
+        <div class="slot">
+            <input type="radio" name="slot" id="slot3" value="11:00 AM">
+            <label for="slot3" onclick="selectSlot('11:00 AM', 3)">11:00 AM</label>
+        </div>
+        
+        <br>
+        <button type="submit">Submit</button>
+        <button type="button" onclick="debugForm()">Debug</button>
+    </form>
+    
+    <div id="result" class="result">
+        <p>No slot selected yet. Click on a time slot above.</p>
+    </div>
+    
+    <div id="error" class="error" style="display: none;">
+        Please select a time slot before submitting.
+    </div>
+    
+    <script>
+        function selectSlot(value, index) {
+            console.log('selectSlot called:', value, index);
+            
+            // Uncheck all radios first
+            document.querySelectorAll('input[name="slot"]').forEach(r => r.checked = false);
+            
+            // Check the specific radio
+            const radio = document.getElementById('slot' + index);
+            if (radio) {
+                radio.checked = true;
+                console.log('Radio checked:', radio.checked);
+                
+                // Update display
+                document.getElementById('result').innerHTML = 
+                    `<p><strong>Selected:</strong> ${value}</p><p>Radio checked: ${radio.checked}</p>`;
+                
+                // Hide error
+                document.getElementById('error').style.display = 'none';
+            } else {
+                console.error('Radio not found:', 'slot' + index);
+            }
+        }
+        
+        function debugForm() {
+            console.log('=== DEBUG ===');
+            const radios = document.querySelectorAll('input[name="slot"]');
+            radios.forEach((r, i) => {
+                console.log(`Radio ${i+1}: id=${r.id}, value=${r.value}, checked=${r.checked}`);
+            });
+            
+            const selected = document.querySelector('input[name="slot"]:checked');
+            console.log('Selected:', selected ? selected.value : 'NONE');
+            
+            alert('Check console for debug info');
+        }
+        
+        document.getElementById('test-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selected = document.querySelector('input[name="slot"]:checked');
+            if (selected) {
+                document.getElementById('result').innerHTML = 
+                    `<p><strong>✅ FORM SUBMITTED!</strong></p><p>Selected: ${selected.value}</p>`;
+                document.getElementById('error').style.display = 'none';
+            } else {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('result').innerHTML = 
+                    '<p><strong>❌ FORM ERROR:</strong> No slot selected</p>';
+            }
+        });
+    </script>
+</body>
+</html>

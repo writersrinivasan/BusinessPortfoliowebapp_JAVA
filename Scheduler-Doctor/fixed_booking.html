@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment with Dr. Smith</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        /* Custom styling for slot selection */
+        .slot-label {
+            display: block;
+            padding: 12px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #fff;
+            text-align: center;
+            font-weight: 500;
+            color: #495057;
+            text-decoration: none;
+            user-select: none;
+            position: relative;
+        }
+
+        .slot-label:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-color: #0d6efd;
+            color: #0d6efd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .slot-radio:checked + .slot-label,
+        .slot-label.selected-slot {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .slot-radio:checked + .slot-label:hover,
+        .slot-label.selected-slot:hover {
+            background-color: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+
+        .slot-radio {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .form-check {
+            margin-bottom: 0;
+            position: relative;
+        }
+
+        /* Animation for slot selection */
+        @keyframes slotSelect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .slot-label.selected-slot {
+            animation: slotSelect 0.3s ease;
+        }
+        
+        /* Error message styling */
+        .error-message {
+            color: #dc3545;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        /* Success message styling */
+        .success-message {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            border-radius: 5px;
+            color: #155724;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Doctor Scheduler</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="bi bi-calendar-plus"></i> Book Appointment</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Doctor Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="bi bi-person-badge"></i> Book Appointment
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2 text-center">
+                                <i class="bi bi-person-circle display-4 text-primary"></i>
+                            </div>
+                            <div class="col-md-10">
+                                <h5 class="text-primary mb-1">Dr. Smith</h5>
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-stethoscope"></i> Cardiologist
+                                </p>
+                                <p class="mb-3">Experienced heart specialist with over 15 years of practice.</p>
+                                
+                                <div class="alert alert-info d-flex align-items-center">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <div>
+                                        <strong>Available Slots:</strong> 
+                                        <span id="available-count" class="badge bg-success ms-1">6</span>
+                                        <span class="ms-2 small">Select your preferred time below</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-plus"></i> Appointment Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="booking-form">
+                            <input type="hidden" name="doctor_id" value="1">
+                            
+                            <!-- Patient Information -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="patient_name" class="form-label">
+                                        <i class="bi bi-person"></i> Full Name *
+                                    </label>
+                                    <input type="text" 
+                                          class="form-control" 
+                                          id="patient_name" 
+                                          name="patient_name" 
+                                          required
+                                          placeholder="Enter your full name">
+                                    <div class="invalid-feedback">
+                                        Please provide your full name.
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="patient_phone" class="form-label">
+                                        <i class="bi bi-telephone"></i> Phone Number *
+                                    </label>
+                                    <input type="tel" 
+                                          class="form-control" 
+                                          id="patient_phone" 
+                                          name="patient_phone" 
+                                          required
+                                          placeholder="e.g., (555) 123-4567">
+                                    <div class="invalid-feedback">
+                                        Please provide a valid phone number.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label for="patient_email" class="form-label">
+                                        <i class="bi bi-envelope"></i> Email Address (Optional)
+                                    </label>
+                                    <input type="email" 
+                                          class="form-control" 
+                                          id="patient_email" 
+                                          name="patient_email" 
+                                          placeholder="your.email@example.com">
+                                    <div class="form-text">
+                                        Email is optional but recommended for appointment confirmations.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Time Slot Selection -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="bi bi-clock"></i> Select Appointment Time *
+                                </label>
+                                
+                                <div id="slots-container">
+                                    <div class="row" id="slots-grid">
+                                        <!-- Slot 1 -->
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input slot-radio" 
+                                                      type="radio" 
+                                                      name="slot" 
+                                                      value="09:00 AM" 
+                                                      id="slot-1"
+                                                      style="display: none;"
+                                                      required>
+                                                <label class="form-check-label slot-label" 
+                                                      for="slot-1"
+                                                      onclick="selectSlot('09:00 AM', 1)">
+                                                    <i class="bi bi-clock"></i> 09:00 AM
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Slot 2 -->
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input slot-radio" 
+                                                      type="radio" 
+                                                      name="slot" 
+                                                      value="10:00 AM" 
+                                                      id="slot-2"
+                                                      style="display: none;"
+                                                      required>
+                                                <label class="form-check-label slot-label" 
+                                                      for="slot-2"
+                                                      onclick="selectSlot('10:00 AM', 2)">
+                                                    <i class="bi bi-clock"></i> 10:00 AM
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Slot 3 -->
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input slot-radio" 
+                                                      type="radio" 
+                                                      name="slot" 
+                                                      value="11:00 AM" 
+                                                      id="slot-3"
+                                                      style="display: none;"
+                                                      required>
+                                                <label class="form-check-label slot-label" 
+                                                      for="slot-3"
+                                                      onclick="selectSlot('11:00 AM', 3)">
+                                                    <i class="bi bi-clock"></i> 11:00 AM
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Slot 4 -->
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input slot-radio" 
+                                                      type="radio" 
+                                                      name="slot" 
+                                                      value="01:00 PM" 
+                                                      id="slot-4"
+                                                      style="display: none;"
+                                                      required>
+                                                <label class="form-check-label slot-label" 
+                                                      for="slot-4"
+                                                      onclick="selectSlot('01:00 PM', 4)">
+                                                    <i class="bi bi-clock"></i> 01:00 PM
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Slot 5 -->
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input slot-radio" 
+                                                      type="radio" 
+                                                      name="slot" 
+                                                      value="02:00 PM" 
+                                                      id="slot-5"
+                                                      style="display: none;"
+                                                      required>
+                                                <label class="form-check-label slot-label" 
+                                                      for="slot-5"
+                                                      onclick="selectSlot('02:00 PM', 5)">
+                                                    <i class="bi bi-clock"></i> 02:00 PM
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Slot 6 -->
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input slot-radio" 
+                                                      type="radio" 
+                                                      name="slot" 
+                                                      value="03:00 PM" 
+                                                      id="slot-6"
+                                                      style="display: none;"
+                                                      required>
+                                                <label class="form-check-label slot-label" 
+                                                      for="slot-6"
+                                                      onclick="selectSlot('03:00 PM', 6)">
+                                                    <i class="bi bi-clock"></i> 03:00 PM
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="slot-error" class="error-message mt-2">
+                                        Please select an appointment time.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="#" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Doctors
+                                </a>
+                                <button type="submit" class="btn btn-primary" id="submit-btn">
+                                    <i class="bi bi-calendar-check"></i> Book Appointment
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Success Message (hidden by default) -->
+                        <div id="success-message" class="success-message mt-4">
+                            <h4><i class="bi bi-check-circle"></i> Appointment Booked Successfully!</h4>
+                            <p>Your appointment has been confirmed. You will receive a confirmation soon.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle"></i> Booking Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6><i class="bi bi-calendar-event"></i> Appointment Date</h6>
+                            <p class="text-muted">Today (available slots shown)</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6><i class="bi bi-geo-alt"></i> Location</h6>
+                            <p class="text-muted">
+                                Medical Center<br>
+                                123 Healthcare Drive<br>
+                                Medical District, City 12345
+                            </p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6><i class="bi bi-clock-history"></i> Duration</h6>
+                            <p class="text-muted">Approximately 30 minutes</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Important Notes -->
+                <div class="card mt-3">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="bi bi-exclamation-triangle"></i> Important Notes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                Please arrive 15 minutes early
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                Bring a valid ID and insurance card
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-check-circle text-success"></i>
+                                You will receive a confirmation message
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- How to Use -->
+                <div class="card mt-3">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-question-circle"></i> How to Select a Time Slot
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ol class="mb-0">
+                            <li class="mb-2">Fill in your personal information above</li>
+                            <li class="mb-2">Click on any available time slot</li>
+                            <li class="mb-2">The selected slot will highlight in blue</li>
+                            <li class="mb-0">Click "Book Appointment" to complete your booking</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded - slot selection test');
+            initBookingForm();
+            
+            // Add debug button
+            addDebugButton();
+        });
+        
+        // Add a debug button to test form state
+        function addDebugButton() {
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = 'Debug Form State';
+            debugBtn.type = 'button';
+            debugBtn.className = 'btn btn-info btn-sm mt-2';
+            debugBtn.onclick = function() {
+                console.log('=== FORM DEBUG ===');
+                
+                // Check form element
+                const form = document.getElementById('booking-form');
+                console.log('Form found:', !!form);
+                
+                // Check all radio buttons
+                const radios = document.querySelectorAll('input[name="slot"]');
+                console.log('Total radio buttons:', radios.length);
+                radios.forEach((radio, i) => {
+                    console.log(`Radio ${i+1}: id=${radio.id}, value=${radio.value}, checked=${radio.checked}`);
+                });
+                
+                // Check selected slot
+                const selected = document.querySelector('input[name="slot"]:checked');
+                console.log('Selected slot:', selected ? selected.value : 'NONE');
+                
+                // Check form fields
+                const name = document.getElementById('patient_name').value;
+                const phone = document.getElementById('patient_phone').value;
+                console.log('Patient name:', name);
+                console.log('Patient phone:', phone);
+                
+                console.log('=== END DEBUG ===');
+            };
+            
+            // Add debug button to form
+            const submitBtnContainer = document.querySelector('.d-grid');
+            if (submitBtnContainer) {
+                submitBtnContainer.appendChild(debugBtn);
+            }
+        }
+        
+        // Initialize the booking form
+        function initBookingForm() {
+            const form = document.getElementById('booking-form');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            // Form validation and submission
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    if (validateForm()) {
+                        console.log('Form validation passed');
+                        
+                        // Show loading state
+                        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Booking...';
+                        submitBtn.disabled = true;
+                        
+                        // Simulate submission (would normally go to server)
+                        setTimeout(() => {
+                            // Show success message
+                            document.getElementById('success-message').style.display = 'block';
+                            
+                            // Hide form
+                            form.style.display = 'none';
+                            
+                            // Scroll to success message
+                            document.getElementById('success-message').scrollIntoView({ behavior: 'smooth' });
+                        }, 1500);
+                    } else {
+                        console.log('Form validation failed');
+                    }
+                });
+            }
+            
+            // Initialize slot selection
+            initializeSlotSelection();
+        }
+        
+        // Initialize slot selection
+        function initializeSlotSelection() {
+            console.log('Initializing slot selection');
+            const slotRadios = document.querySelectorAll('.slot-radio');
+            console.log(`Found ${slotRadios.length} slot radio buttons`);
+            
+            // Add event listeners to all radio buttons
+            slotRadios.forEach((radio, index) => {
+                radio.addEventListener('change', function() {
+                    console.log('Radio change event triggered for:', this.value);
+                    updateSelectedSlot(this.value);
+                    clearSlotError();
+                });
+                
+                console.log(`Radio ${index + 1}: id=${radio.id}, value=${radio.value}`);
+            });
+            
+            // Add click event listeners to labels as backup
+            const slotLabels = document.querySelectorAll('.slot-label');
+            slotLabels.forEach((label, index) => {
+                label.addEventListener('click', function(e) {
+                    console.log('Label clicked for slot:', index + 1);
+                    // The onclick attribute will handle the selection
+                });
+            });
+        }
+        
+        // Function to select a slot (triggered by clicking on a slot label)
+        function selectSlot(slotValue, slotIndex) {
+            console.log('Slot selected:', slotValue, slotIndex);
+            
+            // First, uncheck all other radio buttons
+            const allRadios = document.querySelectorAll('input[name="slot"]');
+            allRadios.forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Find and check the specific radio button
+            const radioBtn = document.getElementById(`slot-${slotIndex}`);
+            if (radioBtn) {
+                radioBtn.checked = true;
+                console.log('Radio button checked:', radioBtn.checked);
+                
+                // Trigger a change event to ensure any listeners are notified
+                const changeEvent = new Event('change', { bubbles: true });
+                radioBtn.dispatchEvent(changeEvent);
+                
+                // Update visual feedback
+                clearSlotError();
+                updateSelectedSlot(slotValue);
+                
+                // Log selection
+                console.log(`Selected slot ${slotIndex}: ${slotValue}`);
+                
+                // Additional verification
+                setTimeout(() => {
+                    const isStillChecked = radioBtn.checked;
+                    console.log('Verification - radio still checked:', isStillChecked);
+                    if (!isStillChecked) {
+                        console.error('Radio button unchecked unexpectedly, forcing check');
+                        radioBtn.checked = true;
+                    }
+                }, 100);
+            } else {
+                console.error('Radio button not found for slot:', slotIndex);
+            }
+        }
+        
+        // Update the visual indication of selected slot
+        function updateSelectedSlot(slotValue) {
+            // Clear previous selections
+            const labels = document.querySelectorAll('.slot-label');
+            labels.forEach(label => {
+                label.classList.remove('selected-slot');
+            });
+            
+            // Find the label for the selected slot and highlight it
+            const radioBtn = document.querySelector(`input[value="${slotValue}"]`);
+            if (radioBtn) {
+                const label = document.querySelector(`label[for="${radioBtn.id}"]`);
+                if (label) {
+                    label.classList.add('selected-slot');
+                }
+            }
+        }
+        
+        // Hide slot error message
+        function clearSlotError() {
+            document.getElementById('slot-error').style.display = 'none';
+        }
+        
+        // Show slot error message
+        function showSlotError() {
+            document.getElementById('slot-error').style.display = 'block';
+        }
+        
+        // Validate the form
+        function validateForm() {
+            let isValid = true;
+            console.log('Starting form validation...');
+            
+            // Validate required text fields
+            const requiredFields = ['patient_name', 'patient_phone'];
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && !field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    console.log(`Field ${fieldId} is invalid - empty`);
+                    isValid = false;
+                } else if (field) {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                    console.log(`Field ${fieldId} is valid`);
+                }
+            });
+            
+            // Validate slot selection with detailed logging
+            const selectedSlot = document.querySelector('input[name="slot"]:checked');
+            console.log('Checking slot selection...');
+            console.log('Selected slot element:', selectedSlot);
+            console.log('Selected slot value:', selectedSlot ? selectedSlot.value : 'none');
+            
+            if (!selectedSlot) {
+                console.log('No slot selected - showing error');
+                showSlotError();
+                isValid = false;
+            } else {
+                console.log('Slot selection is valid:', selectedSlot.value);
+                clearSlotError();
+            }
+            
+            console.log('Form validation result:', isValid);
+            return isValid;
+        }
+    </script>
+</body>
+</html>

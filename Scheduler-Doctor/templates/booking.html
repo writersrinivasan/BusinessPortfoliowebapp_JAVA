@@ -1,0 +1,713 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment with {{ doctor.name }} - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Doctor Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-person-badge"></i> Book Appointment
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 text-center">
+                        <i class="bi bi-person-circle display-4 text-primary"></i>
+                    </div>
+                    <div class="col-md-10">
+                        <h5 class="text-primary mb-1">{{ doctor.name }}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-stethoscope"></i> {{ doctor.specialty }}
+                        </p>
+                        <p class="mb-3">{{ doctor.description }}</p>
+                        
+                        <div class="alert alert-info d-flex align-items-center">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <div>
+                                <strong>Available Slots:</strong> 
+                                <span id="available-count" class="badge bg-success ms-1">{{ available_slots|length }}</span>
+                                <span class="ms-2 small">Select your preferred time below</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar-plus"></i> Appointment Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="booking-form" action="{{ url_for('book_appointment') }}" method="POST">
+                    <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+                    
+                    <!-- Patient Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="patient_name" class="form-label">
+                                <i class="bi bi-person"></i> Full Name *
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="patient_name" 
+                                   name="patient_name" 
+                                   required
+                                   placeholder="Enter your full name">
+                            <div class="invalid-feedback">
+                                Please provide your full name.
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="patient_phone" class="form-label">
+                                <i class="bi bi-telephone"></i> Phone Number *
+                            </label>
+                            <input type="tel" 
+                                   class="form-control" 
+                                   id="patient_phone" 
+                                   name="patient_phone" 
+                                   required
+                                   placeholder="e.g., (555) 123-4567"
+                                   pattern="[0-9\-\(\)\+\s]+">
+                            <div class="invalid-feedback">
+                                Please provide a valid phone number.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <label for="patient_email" class="form-label">
+                                <i class="bi bi-envelope"></i> Email Address (Optional)
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="patient_email" 
+                                   name="patient_email" 
+                                   placeholder="your.email@example.com">
+                            <div class="form-text">
+                                Email is optional but recommended for appointment confirmations.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slot Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-clock"></i> Select Appointment Time *
+                        </label>
+                        
+                        <div id="slots-container">
+                            {% if available_slots %}
+                                <div class="row" id="slots-grid">
+                                    {% for slot in available_slots %}
+                                    <div class="col-md-4 col-sm-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input slot-radio" 
+                                                   type="radio" 
+                                                   name="slot" 
+                                                   value="{{ slot }}" 
+                                                   id="slot-{{ loop.index }}"
+                                                   required
+                                                   style="position: absolute; opacity: 0; pointer-events: none;">
+                                            <label class="form-check-label slot-label" 
+                                                   for="slot-{{ loop.index }}"
+                                                   onclick="selectSlot('{{ slot }}', {{ loop.index }})">
+                                                <i class="bi bi-clock"></i> {{ slot }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="invalid-feedback d-block" id="slot-error" style="display: none !important;">
+                                    Please select an appointment time.
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <strong>No slots available</strong> - This doctor currently has no available appointment slots. 
+                                    Please check back later or <a href="{{ url_for('index') }}">choose another doctor</a>.
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button type="button" 
+                                    class="btn btn-outline-secondary btn-sm" 
+                                    onclick="refreshSlots()"
+                                    id="refresh-btn">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh Available Slots
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Doctors
+                        </a>
+                        {% if available_slots %}
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="bi bi-calendar-check"></i> Book Appointment
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Booking Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="bi bi-calendar-event"></i> Appointment Date</h6>
+                    <p class="text-muted">Today (available slots shown above)</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="bi bi-geo-alt"></i> Location</h6>
+                    <p class="text-muted">
+                        Medical Center<br>
+                        123 Healthcare Drive<br>
+                        Medical District, City 12345
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="bi bi-clock-history"></i> Duration</h6>
+                    <p class="text-muted">Approximately 30 minutes</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6><i class="bi bi-credit-card"></i> Payment</h6>
+                    <p class="text-muted">Payment will be collected during your visit</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Important Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Please arrive 15 minutes early
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Bring a valid ID and insurance card
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Cancellations must be made 24 hours in advance
+                    </li>
+                    <li class="mb-0">
+                        <i class="bi bi-check-circle text-success"></i>
+                        You will receive a confirmation message
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Form validation and slot refresh functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('booking-form');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    console.log('Booking page initialized');
+    console.log('Form found:', !!form);
+    console.log('Submit button found:', !!submitBtn);
+    
+    // Add debug functionality in development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        addDebugTools();
+    }
+    
+    // Form validation
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            console.log('Form submit triggered');
+            event.preventDefault();
+            event.stopPropagation();
+            
+            if (validateForm()) {
+                console.log('Form validation passed, submitting...');
+                // Show loading state
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Booking...';
+                    submitBtn.disabled = true;
+                }
+                
+                // Submit the form normally (not AJAX to handle redirects properly)
+                setTimeout(() => {
+                    form.submit();
+                }, 100);
+            } else {
+                console.log('Form validation failed');
+            }
+        });
+    }
+    
+    // Real-time validation
+    const inputs = form ? form.querySelectorAll('input[required]') : [];
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', clearFieldError);
+    });
+    
+    // Initialize slot selection
+    initializeSlotSelection();
+});
+
+// Add debug tools for development
+function addDebugTools() {
+    console.log('Adding debug tools...');
+    
+    // Add debug button
+    const debugBtn = document.createElement('button');
+    debugBtn.textContent = '🐛 Debug Form';
+    debugBtn.type = 'button';
+    debugBtn.className = 'btn btn-info btn-sm mt-2 me-2';
+    debugBtn.onclick = function() {
+        console.log('=== FORM DEBUG INFO ===');
+        
+        // Check form elements
+        const form = document.getElementById('booking-form');
+        console.log('Form element found:', !!form);
+        
+        // Check all radio buttons
+        const radios = document.querySelectorAll('input[name="slot"]');
+        console.log('Total slot radio buttons:', radios.length);
+        radios.forEach((radio, i) => {
+            console.log(`Radio ${i+1}: id=${radio.id}, value="${radio.value}", checked=${radio.checked}`);
+        });
+        
+        // Check selected slot
+        const selected = document.querySelector('input[name="slot"]:checked');
+        console.log('Currently selected slot:', selected ? selected.value : 'NONE');
+        
+        // Check form field values
+        const nameField = document.getElementById('patient_name');
+        const phoneField = document.getElementById('patient_phone');
+        console.log('Patient name:', nameField ? nameField.value : 'Field not found');
+        console.log('Patient phone:', phoneField ? phoneField.value : 'Field not found');
+        
+        // Test form validation
+        console.log('Form validation result:', validateForm());
+        
+        console.log('=== END DEBUG INFO ===');
+        
+        alert('Debug info logged to console. Press F12 to view.');
+    };
+    
+    // Add to the submit button area
+    const submitArea = document.querySelector('.d-grid.gap-2');
+    if (submitArea) {
+        submitArea.appendChild(debugBtn);
+    }
+}
+
+function initializeSlotSelection() {
+    const slotRadios = document.querySelectorAll('.slot-radio');
+    console.log('Found slot radios:', slotRadios.length);
+    
+    // Add change event listeners to all radio buttons
+    slotRadios.forEach((radio, index) => {
+        radio.addEventListener('change', function() {
+            console.log('Radio change event for:', this.value);
+            clearSlotError();
+            updateSelectedSlot(this.value);
+        });
+        
+        console.log(`Radio ${index + 1}: id=${radio.id}, value=${radio.value}, checked=${radio.checked}`);
+    });
+    
+    // Add click listeners to labels as additional backup
+    const slotLabels = document.querySelectorAll('.slot-label');
+    slotLabels.forEach((label, index) => {
+        label.addEventListener('click', function(e) {
+            console.log(`Label clicked for slot ${index + 1}`);
+            // The onclick attribute handles the main selection logic
+        });
+    });
+    
+    console.log('Slot selection initialization complete');
+}
+
+function selectSlot(slotValue, slotIndex) {
+    console.log('Slot selected:', slotValue, slotIndex);
+    
+    // Uncheck all radio buttons first to prevent conflicts
+    const allRadios = document.querySelectorAll('input[name="slot"]');
+    allRadios.forEach(radio => {
+        radio.checked = false;
+    });
+    
+    // Find and check the specific radio button
+    const radioButton = document.getElementById(`slot-${slotIndex}`);
+    if (radioButton) {
+        radioButton.checked = true;
+        console.log('Radio button checked:', radioButton.checked);
+        
+        // Trigger change event to notify any listeners
+        const changeEvent = new Event('change', { bubbles: true });
+        radioButton.dispatchEvent(changeEvent);
+        
+        // Update visual feedback
+        clearSlotError();
+        updateSelectedSlot(slotValue);
+        
+        // Verification check after a short delay
+        setTimeout(() => {
+            if (!radioButton.checked) {
+                console.warn('Radio button unchecked unexpectedly, forcing check');
+                radioButton.checked = true;
+            }
+        }, 100);
+        
+        console.log(`Successfully selected slot ${slotIndex}: ${slotValue}`);
+    } else {
+        console.error('Radio button not found for slot:', slotIndex);
+    }
+}
+
+function validateForm() {
+    let isValid = true;
+    console.log('Starting form validation...');
+    
+    // Validate required text fields
+    const requiredFields = ['patient_name', 'patient_phone'];
+    requiredFields.forEach(fieldName => {
+        const field = document.getElementById(fieldName);
+        if (field && !field.value.trim()) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+            console.log(`Field ${fieldName} is invalid - empty value`);
+            isValid = false;
+        } else if (field) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            console.log(`Field ${fieldName} is valid`);
+        }
+    });
+    
+    // Validate slot selection with detailed logging
+    const selectedSlot = document.querySelector('input[name="slot"]:checked');
+    console.log('Checking slot selection...');
+    console.log('Selected slot element:', selectedSlot);
+    console.log('Selected slot value:', selectedSlot ? selectedSlot.value : 'NONE SELECTED');
+    
+    if (!selectedSlot) {
+        console.log('ERROR: No slot selected - showing error message');
+        showSlotError();
+        isValid = false;
+    } else {
+        console.log('SUCCESS: Valid slot selection:', selectedSlot.value);
+        clearSlotError();
+    }
+    
+    console.log('Form validation result:', isValid ? 'PASSED' : 'FAILED');
+    return isValid;
+}
+
+function validateField(event) {
+    const field = event.target;
+    const value = field.value.trim();
+    
+    // Clear previous error state
+    field.classList.remove('is-invalid');
+    
+    // Check if field is required and empty
+    if (field.hasAttribute('required') && !value) {
+        field.classList.add('is-invalid');
+        return false;
+    }
+    
+    // Validate phone number format
+    if (field.type === 'tel' && value) {
+        const phonePattern = /^[\d\-\(\)\+\s]+$/;
+        if (!phonePattern.test(value)) {
+            field.classList.add('is-invalid');
+            return false;
+        }
+    }
+    
+    // Validate email format
+    if (field.type === 'email' && value) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(value)) {
+            field.classList.add('is-invalid');
+            return false;
+        }
+    }
+    
+    field.classList.add('is-valid');
+    return true;
+}
+
+function clearFieldError(event) {
+    const field = event.target;
+    field.classList.remove('is-invalid');
+}
+
+function showSlotError() {
+    const errorElement = document.getElementById('slot-error');
+    if (errorElement) {
+        errorElement.style.display = 'block';
+    }
+}
+
+function clearSlotError() {
+    const errorElement = document.getElementById('slot-error');
+    if (errorElement) {
+        errorElement.style.display = 'none';
+    }
+}
+
+function updateSelectedSlot(slot) {
+    // Update visual feedback for selected slot
+    const labels = document.querySelectorAll('.slot-label');
+    labels.forEach(label => {
+        label.classList.remove('selected-slot');
+    });
+    
+    const selectedLabel = document.querySelector(`input[value="${slot}"] + label`);
+    if (selectedLabel) {
+        selectedLabel.classList.add('selected-slot');
+    }
+}
+
+function refreshSlots() {
+    const doctorIdInput = document.querySelector('input[name="doctor_id"]');
+    if (!doctorIdInput) {
+        console.error('Doctor ID input not found');
+        return;
+    }
+    
+    const doctorId = parseInt(doctorIdInput.value);
+    if (!doctorId) {
+        console.error('Invalid doctor ID:', doctorIdInput.value);
+        return;
+    }
+    
+    const refreshBtn = document.getElementById('refresh-btn');
+    const slotsContainer = document.getElementById('slots-container');
+    
+    console.log('Refreshing slots for doctor:', doctorId);
+    
+    // Show loading state
+    if (refreshBtn) {
+        LoadingManager.setButtonLoading(refreshBtn, 'Refreshing...');
+    }
+    
+    // Make the API call
+    fetch(`/api/available_slots/${doctorId}`)
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data);
+            if (data.success) {
+                updateSlotsDisplay(data.slots);
+                updateAvailableCount(data.slots.length);
+                showNotification(`Refreshed! ${data.slots.length} slots available`, 'success');
+            } else {
+                console.error('API returned error:', data.error);
+                showNotification(`Failed to refresh slots: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing slots:', error);
+            showNotification(`Error refreshing slots: ${error.message}`, 'error');
+        })
+        .finally(() => {
+            // Restore button state
+            if (refreshBtn) {
+                LoadingManager.clearButtonLoading(refreshBtn);
+            }
+        });
+}
+
+function updateSlotsDisplay(slots) {
+    const slotsGrid = document.getElementById('slots-grid');
+    
+    if (slots.length === 0) {
+        slotsGrid.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>No slots available</strong> - This doctor currently has no available appointment slots.
+                </div>
+            </div>
+        `;
+        
+        // Hide submit button
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+            submitBtn.style.display = 'none';
+        }
+    } else {
+        let html = '';
+        slots.forEach((slot, index) => {                        html += `
+                            <div class="col-md-4 col-sm-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input slot-radio" 
+                                           type="radio" 
+                                           name="slot" 
+                                           value="${slot}" 
+                                           id="slot-${index + 1}"
+                                           required
+                                           style="position: absolute; opacity: 0; pointer-events: none;">
+                                    <label class="form-check-label slot-label" 
+                                           for="slot-${index + 1}"
+                                           onclick="selectSlot('${slot}', ${index + 1})">
+                                        <i class="bi bi-clock"></i> ${slot}
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+        });                        slotsGrid.innerHTML = html;
+                        
+                        // Re-initialize slot selection for new radio buttons
+                        initializeSlotSelection();
+                        
+                        // Show submit button
+                        const submitBtn = document.getElementById('submit-btn');
+                        if (submitBtn) {
+                            submitBtn.style.display = 'inline-block';
+                        }
+                        
+                        console.log('Slots display updated with', slots.length, 'slots');
+    }
+}
+
+function updateAvailableCount(count) {
+    const countElement = document.getElementById('available-count');
+    if (countElement) {
+        countElement.textContent = count;
+        countElement.className = count > 0 ? 'badge bg-success ms-1' : 'badge bg-danger ms-1';
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const alertClass = type === 'error' ? 'alert-danger' : type === 'success' ? 'alert-success' : 'alert-info';
+    const iconClass = type === 'error' ? 'bi-exclamation-triangle' : type === 'success' ? 'bi-check-circle' : 'bi-info-circle';
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${alertClass} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+        <i class="bi ${iconClass}"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('main.container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Auto-refresh slots every 30 seconds
+setInterval(() => {
+    refreshSlots();
+}, 30000);
+</script>
+
+<style>
+.slot-label {
+    display: block;
+    padding: 12px 16px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #fff;
+    text-align: center;
+    font-weight: 500;
+    color: #495057;
+    text-decoration: none;
+    user-select: none;
+    position: relative;
+}
+
+.slot-label:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: #0d6efd;
+    color: #0d6efd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.slot-radio:checked + .slot-label,
+.slot-label.selected-slot {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+    transform: translateY(-2px);
+}
+
+.slot-radio:checked + .slot-label:hover,
+.slot-label.selected-slot:hover {
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+}
+
+.slot-radio {
+    position: absolute !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.form-check {
+    margin-bottom: 0;
+    position: relative;
+}
+
+/* Animation for slot selection */
+@keyframes slotSelect {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.slot-label.selected-slot {
+    animation: slotSelect 0.3s ease;
+}
+</style>
+{% endblock %}

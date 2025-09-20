@@ -1,0 +1,72 @@
+{
+  "doctors": [
+    {
+      "id": 1,
+      "name": "Dr. Sarah Smith",
+      "specialty": "General Medicine",
+      "description": "Experienced family physician with over 10 years of practice",
+      "available_slots": [
+        "09:00 AM",
+        "10:00 AM",
+        "11:00 AM",
+        "02:00 PM",
+        "03:00 PM",
+        "04:00 PM"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Dr. Michael Johnson",
+      "specialty": "Cardiology",
+      "description": "Specialist in heart conditions and cardiovascular health",
+      "available_slots": [
+        "08:00 AM",
+        "09:30 AM",
+        "11:00 AM",
+        "01:30 PM",
+        "03:00 PM",
+        "04:30 PM"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Dr. Emily Davis",
+      "specialty": "Dermatology",
+      "description": "Expert in skin conditions and cosmetic dermatology",
+      "available_slots": [
+        "09:00 AM",
+        "10:30 AM",
+        "12:00 PM",
+        "02:30 PM",
+        "04:00 PM"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Dr. Robert Wilson",
+      "specialty": "Orthopedics",
+      "description": "Specialized in bone, joint, and muscle disorders",
+      "available_slots": [
+        "08:30 AM",
+        "10:00 AM",
+        "11:30 AM",
+        "01:00 PM",
+        "02:30 PM",
+        "04:00 PM"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Dr. Lisa Anderson",
+      "specialty": "Pediatrics",
+      "description": "Caring for children's health and development",
+      "available_slots": [
+        "09:00 AM",
+        "10:00 AM",
+        "11:00 AM",
+        "02:00 PM",
+        "03:00 PM"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Statistics - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-graph-up"></i> Admin Dashboard - Booking Statistics
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Statistics Overview -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <i class="bi bi-calendar-check display-4"></i>
+                                <h3 class="mt-2">{{ stats.total_bookings }}</h3>
+                                <p class="mb-0">Total Bookings</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <i class="bi bi-check-circle display-4"></i>
+                                <h3 class="mt-2">{{ stats.confirmed_bookings }}</h3>
+                                <p class="mb-0">Confirmed</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <i class="bi bi-x-circle display-4"></i>
+                                <h3 class="mt-2">{{ stats.cancelled_bookings }}</h3>
+                                <p class="mb-0">Cancelled</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <i class="bi bi-person-badge display-4"></i>
+                                <h3 class="mt-2">{{ stats.doctors_with_bookings }}</h3>
+                                <p class="mb-0">Active Doctors</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Bookings -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h5><i class="bi bi-list-ul"></i> Recent Bookings</h5>
+                        {% if bookings %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Booking ID</th>
+                                            <th>Patient</th>
+                                            <th>Doctor</th>
+                                            <th>Time Slot</th>
+                                            <th>Status</th>
+                                            <th>Booked On</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for booking in bookings[-10:] %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ booking.id }}</span>
+                                            </td>
+                                            <td>
+                                                <strong>{{ booking.patient_name }}</strong><br>
+                                                <small class="text-muted">{{ booking.patient_phone }}</small>
+                                            </td>
+                                            <td>{{ booking.doctor_name }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ booking.slot }}</span>
+                                            </td>
+                                            <td>
+                                                {% if booking.status == 'confirmed' %}
+                                                    <span class="badge bg-success">Confirmed</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Cancelled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small>{{ booking.booking_date[:16] | replace('T', ' ') }}</small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> No bookings found.
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <h5><i class="bi bi-person-lines-fill"></i> Doctor Availability</h5>
+                        {% if doctors %}
+                            {% for doctor in doctors %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ doctor.name }}</h6>
+                                    <p class="text-muted small">{{ doctor.specialty }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted small">Available Slots:</span>
+                                        <span class="badge {% if doctor.available_slots|length > 3 %}bg-success{% elif doctor.available_slots|length > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ doctor.available_slots|length }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

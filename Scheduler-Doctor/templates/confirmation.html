@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmation - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-check-circle-fill"></i> Appointment Confirmed!
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="bi bi-calendar-check display-1 text-success"></i>
+                </div>
+                
+                <h5 class="mb-3">Your appointment has been successfully booked!</h5>
+                
+                <div class="row text-start">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <strong><i class="bi bi-receipt"></i> Booking ID:</strong>
+                            <span class="badge bg-primary ms-2">{{ booking.booking_id }}</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong><i class="bi bi-person-badge"></i> Doctor:</strong><br>
+                            <span class="text-muted">{{ booking.doctor_name }}</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong><i class="bi bi-person"></i> Patient:</strong><br>
+                            <span class="text-muted">{{ booking.patient_name }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <strong><i class="bi bi-clock"></i> Appointment Time:</strong><br>
+                            <span class="text-primary fw-bold">{{ booking.slot }}</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong><i class="bi bi-calendar-event"></i> Date:</strong><br>
+                            <span class="text-muted">Today</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong><i class="bi bi-geo-alt"></i> Location:</strong><br>
+                            <span class="text-muted">Medical Center</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Important:</strong> Please arrive 15 minutes before your appointment time.
+                    Bring a valid ID and your insurance card.
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="bi bi-house"></i> Back to Home
+                    </a>
+                    <a href="{{ url_for('my_bookings') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-calendar-check"></i> View My Bookings
+                    </a>
+                    <button class="btn btn-outline-success" onclick="printConfirmation()">
+                        <i class="bi bi-printer"></i> Print Confirmation
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> What's Next?
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="bi bi-bell display-6 text-primary"></i>
+                        <h6 class="mt-2">Reminder</h6>
+                        <p class="text-muted small">You'll receive a reminder before your appointment</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="bi bi-clipboard-check display-6 text-info"></i>
+                        <h6 class="mt-2">Preparation</h6>
+                        <p class="text-muted small">Prepare any questions you'd like to ask</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="bi bi-telephone display-6 text-success"></i>
+                        <h6 class="mt-2">Support</h6>
+                        <p class="text-muted small">Call (555) 123-4567 if you need to make changes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function printConfirmation() {
+    window.print();
+}
+
+// Clear the booking session data after displaying confirmation
+setTimeout(() => {
+    fetch('/api/clear_session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    }).catch(error => {
+        console.log('Session cleanup error (non-critical):', error);
+    });
+}, 5000);
+</script>
+
+<style>
+@media print {
+    .btn, .card-header, nav, footer {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .alert {
+        background-color: #f8f9fa !important;
+        border: 1px solid #dee2e6 !important;
+        color: #212529 !important;
+    }
+}
+</style>
+{% endblock %}

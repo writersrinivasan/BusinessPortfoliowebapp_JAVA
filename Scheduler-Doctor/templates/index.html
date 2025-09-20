@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Home - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-primary text-white rounded mb-5 p-5 text-center">
+    <h1 class="display-4 mb-3">
+        <i class="bi bi-calendar-heart"></i> Welcome to Doctor Appointment Scheduler
+    </h1>
+    <p class="lead mb-4">
+        Book appointments with our experienced healthcare professionals quickly and easily.
+        Choose from our list of qualified doctors and select your preferred time slot.
+    </p>
+    <div class="row text-center mt-4">
+        <div class="col-md-4">
+            <i class="bi bi-clock-history fs-1 mb-2"></i>
+            <h5>Quick Booking</h5>
+            <p class="small">Book appointments in just a few clicks</p>
+        </div>
+        <div class="col-md-4">
+            <i class="bi bi-shield-check fs-1 mb-2"></i>
+            <h5>Secure & Reliable</h5>
+            <p class="small">Your data is safe and secure with us</p>
+        </div>
+        <div class="col-md-4">
+            <i class="bi bi-telephone fs-1 mb-2"></i>
+            <h5>24/7 Support</h5>
+            <p class="small">Get help whenever you need it</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <h2 class="mb-4">
+            <i class="bi bi-person-badge"></i> Available Doctors
+        </h2>
+        
+        {% if doctors %}
+            <div class="row">
+                {% for doctor in doctors %}
+                <div class="col-md-6 mb-4">
+                    <div class="card doctor-card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start">
+                                <div class="doctor-avatar me-3">
+                                    <i class="bi bi-person-circle fs-1 text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-1">{{ doctor.name }}</h5>
+                                    <p class="text-primary mb-2">
+                                        <i class="bi bi-stethoscope"></i> {{ doctor.specialty }}
+                                    </p>
+                                    <p class="card-text text-muted small mb-3">
+                                        {{ doctor.description }}
+                                    </p>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-clock text-success me-2"></i>
+                                            <span class="small text-muted">Available Slots:</span>
+                                            <span class="badge bg-success ms-2" id="slot-count-{{ doctor.id }}">
+                                                {{ doctor.available_slots|length }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="available-slots" id="slots-preview-{{ doctor.id }}">
+                                            {% for slot in doctor.available_slots[:3] %}
+                                                <span class="badge bg-light text-dark me-1">{{ slot }}</span>
+                                            {% endfor %}
+                                            {% if doctor.available_slots|length > 3 %}
+                                                <span class="text-muted small">+{{ doctor.available_slots|length - 3 }} more</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid">
+                                <a href="{{ url_for('booking_page', doctor_id=doctor.id) }}" 
+                                   class="btn btn-primary btn-book-appointment"
+                                   data-doctor-id="{{ doctor.id }}">
+                                    <i class="bi bi-calendar-plus"></i> Book Appointment
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>No doctors available</strong> - Please check back later or contact support.
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> How It Works
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="step mb-3">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">1</span>
+                        <div>
+                            <h6 class="mb-1">Choose a Doctor</h6>
+                            <p class="text-muted small mb-0">Browse our list of qualified healthcare professionals</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step mb-3">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">2</span>
+                        <div>
+                            <h6 class="mb-1">Select Time Slot</h6>
+                            <p class="text-muted small mb-0">Pick an available time that works for you</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step mb-3">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">3</span>
+                        <div>
+                            <h6 class="mb-1">Fill Your Details</h6>
+                            <p class="text-muted small mb-0">Provide your contact information</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-success rounded-circle me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">✓</span>
+                        <div>
+                            <h6 class="mb-1">Confirmation</h6>
+                            <p class="text-muted small mb-0">Get instant confirmation of your appointment</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Quick Access
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('my_bookings') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-calendar-check"></i> View My Bookings
+                    </a>
+                    <button class="btn btn-outline-secondary" onclick="refreshAvailability()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Availability
+                    </button>
+                </div>
+                
+                <hr>
+                
+                <div class="text-center">
+                    <p class="text-muted small mb-2">Need help?</p>
+                    <p class="text-muted small">
+                        <i class="bi bi-telephone"></i> Call: (555) 123-4567<br>
+                        <i class="bi bi-envelope"></i> Email: support@scheduler.com
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Refresh availability for all doctors
+function refreshAvailability() {
+    const doctors = {{ doctors | tojson }};
+    
+    doctors.forEach(doctor => {
+        fetch(`/api/available_slots/${doctor.id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateDoctorSlots(doctor.id, data.slots);
+                }
+            })
+            .catch(error => {
+                console.error('Error refreshing slots:', error);
+            });
+    });
+    
+    // Show success message
+    showNotification('Availability refreshed!', 'success');
+}
+
+// Update doctor slots display
+function updateDoctorSlots(doctorId, slots) {
+    const slotCountElement = document.getElementById(`slot-count-${doctorId}`);
+    const slotsPreviewElement = document.getElementById(`slots-preview-${doctorId}`);
+    
+    if (slotCountElement) {
+        slotCountElement.textContent = slots.length;
+        slotCountElement.className = slots.length > 0 ? 'badge bg-success ms-2' : 'badge bg-danger ms-2';
+    }
+    
+    if (slotsPreviewElement) {
+        const maxPreview = 3;
+        let html = '';
+        
+        for (let i = 0; i < Math.min(slots.length, maxPreview); i++) {
+            html += `<span class="badge bg-light text-dark me-1">${slots[i]}</span>`;
+        }
+        
+        if (slots.length > maxPreview) {
+            html += `<span class="text-muted small">+${slots.length - maxPreview} more</span>`;
+        }
+        
+        if (slots.length === 0) {
+            html = '<span class="text-danger small"><i class="bi bi-x-circle"></i> No slots available</span>';
+        }
+        
+        slotsPreviewElement.innerHTML = html;
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+        <i class="bi bi-check-circle"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container.mt-3');
+    container.appendChild(alertDiv);
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 3000);
+}
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+    refreshAvailability();
+}, 30000);
+</script>
+{% endblock %}
